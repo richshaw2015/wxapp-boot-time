@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 
 # Appium 服务地址
-EXECUTOR = 'http://127.0.0.1:4723/wd/hub'
+EXECUTOR = 'http://192.168.0.244:4723/wd/hub'
 
 # Appium 所需的被测手机参数，需要根据实际情况修改 platformVersion、deviceName
 ANDROID_CAPS = {
@@ -34,6 +34,7 @@ IMPLICITLY_WAIT = 10
 
 # 被测小程序名
 WXAPP = "有车以后"
+# WXAPP = "拼多多"
 
 # 视频被切割的帧数，即1秒切割成多少张图片
 FPS = 50
@@ -86,10 +87,11 @@ def calculate_boot_time(pngs_dir, fps, refer_end_pic):
         logging.warning("结束位置错误")
     else:
         boot_time = int((end_t - start_t) * 1000 / fps)
+        logging.info("开始位置：%d，结束位置：%d，本次启动耗时：%d毫秒", start_t, end_t, boot_time)
     return boot_time
 
 
-def test_boot_time():
+def test_main():
     """
     小程序启动时间的度量，点击后录屏，然后把视频切割成图片帧，最后通过图片分析计算
     本项目仅做demo参考，未做完善的异常处理
@@ -101,6 +103,7 @@ def test_boot_time():
     driver = webdriver.Remote(EXECUTOR, ANDROID_CAPS)
     driver.implicitly_wait(IMPLICITLY_WAIT)
 
+    time.sleep(6)
     # 进入下拉栏目，被测小程序需要出现在下拉栏里，建议收藏起来，以备日后持续测试
     width, height = driver.get_window_size()['width'], driver.get_window_size()['height']
     driver.swipe(width * 0.5, height * 0.25, width * 0.5, height * 0.75, duration=800)
@@ -126,16 +129,21 @@ def test_boot_time():
     time.sleep(12)
 
     mp4_base64 = driver.stop_recording_screen()
+    driver.quit()
 
     # 生成视频文件
     open(mp4, 'wb').write(base64.b64decode(mp4_base64))
     os.system('ffmpeg -i %s -r %d -ss 00:00:01 -t 00:00:10 -s 1080x1920 %s' % (mp4, FPS, png))
 
     # 找启动的开始（点击屏幕）、结束时间（渲染首页内容）点
-    refer_end_pic = os.path.join(BASE_DIR, 'reference', WXAPP, 'end.png')
+    refer_end_pic = os.path.join(BASE_DIR, 'reference', WXAPP, 't0_end.png')
     boot_time = calculate_boot_time(pngs_dir, FPS, refer_end_pic=refer_end_pic)
     if boot_time > 0:
         # TODO 把这个时间上传到服务器上，进行数据统计和报表制作
         return boot_time
     else:
         raise ValueError
+
+
+if __name__ == '__main__':
+    test_main()
