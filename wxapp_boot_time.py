@@ -91,7 +91,7 @@ def calculate_boot_time(pngs_dir, fps, refer_end_pic):
     return boot_time
 
 
-def test_main():
+def main():
     """
     小程序启动时间的度量，点击后录屏，然后把视频切割成图片帧，最后通过图片分析计算
     本项目仅做demo参考，未做完善的异常处理
@@ -146,4 +146,4 @@ def test_main():
 
 
 if __name__ == '__main__':
-    test_main()
+    main()
