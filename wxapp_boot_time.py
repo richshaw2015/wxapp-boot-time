@@ -76,7 +76,8 @@ def calculate_boot_time(pngs_dir, fps, refer_end_pic):
             third_f = second_f
             second_f = first_f
             first_f = current_f
-            if third_f > 0.97 and second_f > 0.97 and first_f < 0.97:
+            # TODO 这个范围根据实际的业务场景自己确定
+            if third_f > 0.96 and second_f > 0.96 and first_f < 0.96:
                 end_t = int(png.split('.png')[0])
                 break
 
@@ -138,6 +139,7 @@ def main():
     # 找启动的开始（点击屏幕）、结束时间（渲染首页内容）点
     refer_end_pic = os.path.join(BASE_DIR, 'reference', WXAPP, 't0_end.png')
     boot_time = calculate_boot_time(pngs_dir, FPS, refer_end_pic=refer_end_pic)
+    # TODO 这里可以设置一个符合预期的范围，例如 6000 > boot_time > 2000
     if boot_time > 0:
         # TODO 把这个时间上传到服务器上，进行数据统计和报表制作
         return boot_time
